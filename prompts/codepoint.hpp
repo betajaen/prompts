@@ -30,7 +30,7 @@ struct codepoint_t {
             dst[1] = 0x80 | (v & 0x3f);
             return 2;
         }
-        else if (v <= 0xFFFFF) {
+        else if (v <= 0xFFFF) {
             dst[0] = 0xE0 | (v >> 12);
             dst[1] = 0x80 | ((v >> 6) & 0x3F);
             dst[2] = 0x80 | (v & 0x3F);
