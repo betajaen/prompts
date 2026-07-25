@@ -294,7 +294,7 @@ public:
 
 
     terminal_reader(int input = STDIN_FILENO, int output = STDOUT_FILENO, bool bind_tty = true)
-        : m_input(input), m_output(output), m_captured(false) {
+        : m_input(input), m_output(output), m_captured(false), m_orig_termios{} {
         if (bind_tty) {
             bind();
         }
