@@ -125,6 +125,144 @@ public:
         return *this;
     }
 
+
+    inline terminal_writer& cursor_up() {
+        _append_text("\x1b[A");
+        return *this;
+    }
+
+
+    inline terminal_writer& cursor_up(std::int16_t offset) {
+        _append_text("\x1b[");
+        _append_convertable(std::min<std::int16_t>(1,offset));
+        _append_char('A');
+        return *this;
+    }
+
+
+    inline terminal_writer& cursor_down() {
+        _append_text("\x1b[A");
+        return *this;
+    }
+
+
+    inline terminal_writer& cursor_down(std::int16_t offset) {
+        _append_text("\x1b[");
+        _append_convertable(std::min<std::int16_t>(1,offset));
+        _append_char('B');
+        return *this;
+    }
+
+
+    inline terminal_writer& cursor_forward() {
+        _append_text("\x1b[C");
+        return *this;
+    }
+
+
+    inline terminal_writer& cursor_forward(std::uint16_t offset) {
+        _append_text("\x1b[");
+        _append_convertable(std::min<std::int16_t>(1,offset));
+        _append_char('C');
+        return *this;
+    }
+
+
+    inline terminal_writer& cursor_backward() {
+        _append_text("\x1b[D");
+        return *this;
+    }
+
+
+    inline terminal_writer& cursor_backward(std::uint16_t offset) {
+        _append_text("\x1b[");
+        _append_convertable(std::min<std::int16_t>(1,offset));
+        _append_char('D');
+        return *this;
+    }
+
+
+    inline terminal_writer& cursor_next_line() {
+        _append_text("\x1b[E");
+        return *this;
+    }
+
+
+    inline terminal_writer& cursor_next_line(std::uint16_t offset) {
+        _append_text("\x1b[");
+        _append_convertable(std::min<std::int16_t>(1,offset));
+        _append_char('E');
+        return *this;
+    }
+
+
+    inline terminal_writer& cursor_preceeding_line() {
+        _append_text("\x1b[F");
+        return *this;
+    }
+
+
+    inline terminal_writer& cursor_preceeding_line(std::uint16_t offset) {
+        _append_text("\x1b[");
+        _append_convertable(std::min<std::int16_t>(1,offset));
+        _append_char('F');
+        return *this;
+    }
+
+
+    inline terminal_writer& cursor_absolute_column(std::uint16_t col) {
+        _append_text("\x1b[");
+        _append_convertable(std::min<std::int16_t>(1,col));
+        _append_char('G');
+        return *this;
+    }
+
+
+    inline terminal_writer& cursor_absolute_column(std::uint16_t col, std::uint16_t row) {
+        _append_text("\x1b[");
+        _append_convertable(std::min<std::int16_t>(1,col));
+        _append_char(';');
+        _append_convertable(std::min<std::int16_t>(1,row));
+        _append_char('H');
+        return *this;
+    }
+
+
+    inline terminal_writer& erase_display_erase_below() {
+        _append_text("\x1b[0J");
+        return *this;
+    }
+
+
+    inline terminal_writer& erase_display_erase_above() {
+        _append_text("\x1b[1J");
+        return *this;
+    }
+
+
+    inline terminal_writer& erase_display_erase_all() {
+        _append_text("\x1b[2J");
+        return *this;
+    }
+
+
+    inline terminal_writer& erase_to_right() {
+        _append_text("\x1b[0K");
+        return *this;
+    }
+
+
+    inline terminal_writer& erase_to_left() {
+        _append_text("\x1b[1K");
+        return *this;
+    }
+
+
+    inline terminal_writer& erase_line() {
+        _append_text("\x1b[2K");
+        return *this;
+    }
+
 };
 
 
