@@ -65,3 +65,23 @@ constexpr codepoint_t kBackward = { 0x8000'0044 };
 constexpr codepoint_t kBackspace = { 0x8000'0008 };
 
 }
+
+
+
+namespace prompts::strings {
+
+inline std::uint16_t line_width(const std::string_view& sv) {
+    auto s = sv.find('\n');
+
+    if (s == std::string_view::npos) {
+        s = sv.size();
+    }
+
+    if (s >= std::numeric_limits<std::uint16_t>::max()) {
+        return std::numeric_limits<std::uint16_t>::max() - 1;
+    }
+
+    return s;
+}
+
+}
