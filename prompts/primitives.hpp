@@ -320,5 +320,68 @@ inline void hero(terminal_writer& tw, const std::string_view& text, const brush&
     tw.emit();
 }
 
+inline void border(terminal_writer& tw,
+    std::uint16_t cols,
+    std::uint16_t rows,
+    std::uint16_t offset = 0,
+    const pen& fg = { 120 },
+    const brush& bg = brush::none(),
+    char fill = ' ',
+    const std::array<std::string_view, 9>& pattern = {
+        "┏", "━", "┓",
+        "┃", " ", "┃",
+        "┗", "━", "┛"
+    })
+{
+    rows = std::max<std::uint16_t>(1, rows);
+    cols = std::max<std::uint16_t>(1, cols);
+
+    tw.write("\r\x1b[0m");
+    for (std::uint16_t r = 0; r < rows; r++) {
+        if (offset) {
+            tw.cursor_forward(offset);
+        }
+        tw << fg << bg;
+        int off = 0;
+
+        if (rows == 1) {
+            off = 3;
+        }
+        else if (rows == 2) {
+            off = 6 * r;
+        }
+        else if (rows > 2) {
+            if (r == 0) {
+                off = 0;
+            }
+            else if (r == rows - 1) {
+                off = 6;
+            }
+            else {
+                off = 3;
+            }
+        }
+
+
+        if (cols == 1) {
+            tw.write(pattern[off+1]);
+        }
+        else if(cols == 2) {
+            tw.write(pattern[off+0]);
+            tw.write(pattern[off+2]);
+        }
+        else {
+            tw.write(pattern[off+0]);
+            tw.repeat(pattern[off+1], cols - 2);
+            tw.write(pattern[off+2]);
+        }
+        tw.write("\x1b[0m\r\n");
+    }
+
+    tw.emit();
+
+    tw.emit();
+}
+
 
 }
