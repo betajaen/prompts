@@ -80,27 +80,31 @@ public:
 
 
     constexpr terminal_writer& repeat(char ch, std::uint16_t  count) {
-        _append_char(ch);
-        if (count > 1) {
-            _append_text("\x1b[");
-            _append_convertable(count-1);
-            _append_char('b');
+        if (count) {
+            _append_char(ch);
+            if (count > 1) {
+                _append_text("\x1b[");
+                _append_convertable(count-1);
+                _append_char('b');
+            }
         }
         return *this;
     }
 
     constexpr terminal_writer& repeat(const std::string_view& ch, std::uint16_t count) {
-        _append_text(ch);
-        if (count > 1) {
-            if (ch.length() > 1) {
-                for (std::uint16_t i = 1;i < count;i++) {
-                    _append_text(ch);
+        if (count) {
+            _append_text(ch);
+            if (count > 1) {
+                if (ch.length() > 1) {
+                    for (std::uint16_t i = 1;i < count;i++) {
+                        _append_text(ch);
+                    }
                 }
-            }
-            else {
-                _append_text("\x1b[");
-                _append_convertable(count-1);
-                _append_char('b');
+                else {
+                    _append_text("\x1b[");
+                    _append_convertable(count-1);
+                    _append_char('b');
+                }
             }
         }
         return *this;
