@@ -182,12 +182,12 @@ inline void block(terminal_writer& tw, std::uint16_t cols, std::uint16_t rows, c
 }
 
 inline void block_with_text(terminal_writer& tw, const std::string_view& text, std::uint16_t cols, std::uint16_t rows, const brush& b = brush::pal4(1), const pen& p = pen::pal4(15), char fill = ' ', std::uint16_t offset = 0) {
-    rows = std::max<std::uint16_t>(1, rows);
-    cols = std::max<std::uint16_t>(1, cols);
-    std::uint16_t txwd = std::min(cols, strings::line_width(text));
-    std::uint16_t left_w = (cols - txwd) / 2;
-    std::uint16_t right_w = (cols - txwd - left_w);
-    std::uint16_t mid_h = 0;
+    rows = std::max<std::int16_t>(1, rows);
+    cols = std::max<std::int16_t>(1, cols);
+    std::int16_t txwd = std::min<std::int16_t>(cols, strings::line_width(text));
+    std::int16_t left_w = (cols - txwd) / 2;
+    std::int16_t right_w = (cols - txwd - left_w);
+    std::int16_t mid_h = 0;
     if (rows > 1) {
         mid_h = rows / 2;
     }
@@ -213,31 +213,71 @@ inline void block_with_text(terminal_writer& tw, const std::string_view& text, s
 }
 
 
-template<typename TIterator>
-inline void list(terminal_writer& tw, TIterator begin, TIterator end, const pen& bullet_pen = { 240 }, const pen& item_pen = { 15 }) {
+
+
+template<typename T>
+struct list_info {
+    T hilighted = {};
+    T selected = {};
+    pen selected_pen = { 170 };
+    pen not_selected_pen = { 240 };
+    pen item_pen = { 15 };
+    brush hilighted_brush = { 190 };
+    brush hilighted_pen = { 0 };
+    std::string_view not_selected_glyph = "\u2022 ";
+    std::string_view selected_glyph = "\u2713 ";
+};
+
+template<typename I, typename S, typename T = I::value_type>
+inline void list(terminal_writer& tw, I begin, S end, const list_info<T>& info = {}) {
+
     while (begin != end) {
-        tw << bullet_pen << "\u2022 " << item_pen<< *begin++ << pen::none() << "\r\n";
-    }
-    tw.emit();
-}
 
+        const bool is_highlighted = (info.hilighted == *begin);
+        const bool is_selected = (info.selected == *begin);
 
-template<typename TIterator, typename TSelectable>
-inline void list(terminal_writer& tw, TIterator begin, TIterator end, const TSelectable& selected, const pen& selected_pen = { 170 }, const pen& not_selected_pen = { 240 }, const pen& item_pen = { 15 }) {
-    while (begin != end) {
-
-        if (selected == *begin) {
-            tw << selected_pen << "\u2713 ";
+        if (is_highlighted) {
+            tw << info.hilighted_brush << info.hilighted_pen;
         }
         else {
-            tw << not_selected_pen << "\u2022 ";
+            if (is_selected) {
+                tw << info.selected_pen;
+            }
+            else {
+                tw << info.not_selected_pen;
+            }
         }
 
-        tw << item_pen << *begin++  << pen::none() << "\r\n";
+        if (is_selected) {
+            tw << info.selected_glyph;
+        }
+        else {
+            tw << info.not_selected_glyph;
+        }
+
+        tw << info.item_pen << *begin;
+
+        if (is_highlighted) {
+            const std::int16_t len = 60 - strings::line_width(*begin);
+            if (len > 1) {
+                tw.repeat(' ', len);
+                tw << brush::none();
+            }
+        }
+
+        tw << pen::none() << "\r\n";
+        begin++;
     }
     tw.emit();
 }
 
+
+template<typename T>
+inline void list(terminal_writer& tw, auto begin, auto end, const T& selected) {
+    list_info<T> info = {};
+    info.selected = selected;
+    list(tw, begin, end, info);
+}
 
 inline void seperator(terminal_writer& tw, const std::string_view& ch = "\u23AF", std::uint16_t width = 60, const pen& pen = { 240 }) {
     tw << "\r\n";
