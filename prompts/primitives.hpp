@@ -360,91 +360,40 @@ inline void hero(terminal_writer& tw, const std::string_view& text, const brush&
     tw.emit();
 }
 
-inline void border(terminal_writer& tw,
-    std::uint16_t cols,
-    std::uint16_t rows,
-    std::uint16_t offset = 0,
-    const pen& fg = { 120 },
-    const brush& bg = brush::none(),
-    const std::array<std::string_view, 9>& pattern = {
+struct border_info {
+    std::int16_t offset = 0;
+    const pen& border_fg = { 120 };
+    const pen& text_fg = { 15 };
+    const brush& bg = brush::none();
+    std::array<std::string_view, 9> pattern = {
         "┏", "━", "┓",
         "┃", " ", "┃",
         "┗", "━", "┛"
-    })
-{
-    rows = std::max<std::uint16_t>(3, rows);
-    cols = std::max<std::uint16_t>(3, cols);
+    };
+};
+
+void border(terminal_writer& tw, pos_t cols, pos_t rows, const std::string_view& text = "", const border_info& info = {}) {
+    rows = std::max<pos_t>(3, rows);
+    cols = std::max<pos_t>(3, cols);
+    pos_t text_size = 0, text_left = 0, text_right = 0, text_mid = 0;
+    std::string_view render_text;
+    bool has_text = false;
+    if (text.size()) {
+        has_text = true;
+        text_size = strings::line_width(text);
+        text_size = std::min<pos_t>(cols - 2, text_size);
+        text_left = (cols - 1 - text_size) / 2;
+        text_right = (cols - 2 - text_size - text_left);
+        text_mid = rows / 2;
+        render_text = text.substr(0, text_size);
+    }
 
     tw.write("\r\x1b[0m");
     for (std::uint16_t r = 0; r < rows; r++) {
-        if (offset) {
-            tw.cursor_forward(offset);
+        if (info.offset) {
+            tw.cursor_forward(info.offset);
         }
-        tw << fg << bg;
-        int off = 0;
-
-        if (rows == 1) {
-            off = 3;
-        }
-        else if (rows == 2) {
-            off = 6 * r;
-        }
-        else if (rows > 2) {
-            if (r == 0) {
-                off = 0;
-            }
-            else if (r == rows - 1) {
-                off = 6;
-            }
-            else {
-                off = 3;
-            }
-        }
-
-        tw.write(pattern[off+0]);
-        tw.repeat(pattern[off+1], cols - 2);
-        tw.write(pattern[off+2]);
-
-        tw.write("\x1b[0m\r\n");
-    }
-
-    tw.emit();
-}
-
-
-inline void border_with_text(terminal_writer& tw,
-    std::string_view text,
-    std::int16_t cols,
-    std::int16_t rows,
-    std::int16_t offset = 0,
-    const pen& border_fg = { 120 },
-    const pen& text_fg = { 15 },
-    const brush& bg = brush::none(),
-    const std::array<std::string_view, 9>& pattern = {
-        "┏", "━", "┓",
-        "┃", " ", "┃",
-        "┗", "━", "┛"
-    })
-{
-    rows = std::max<std::int16_t>(3, rows);
-    cols = std::max<std::int16_t>(3, cols);
-    std::int16_t txwd = std::min<std::int16_t>(cols - 2, strings::line_width(text));
-    std::int16_t left_w = ((cols - 1 - txwd) / 2);
-    std::int16_t right_w = (cols - 2 - txwd - left_w);
-    std::uint16_t mid_h = 0;
-    if (rows > 1) {
-        mid_h = rows / 2;
-    }
-
-    std::string_view render_text = text.substr(0, txwd);
-
-
-    tw.write("\r\x1b[0m");
-    for (std::uint16_t r = 0; r < rows; r++) {
-        if (offset) {
-            tw.cursor_forward(offset);
-        }
-        tw << border_fg << bg;
+        tw << info.border_fg << info.bg;
         int off = 0;
 
         if (rows == 1) {
@@ -466,25 +415,23 @@ inline void border_with_text(terminal_writer& tw,
         }
 
 
-        tw.write(pattern[off+0]);
+        tw.write(info.pattern[off+0]);
 
-        if (r == mid_h) {
-            tw.repeat(pattern[off+1], left_w);
-            tw << text_fg << render_text << border_fg;
-            tw.repeat(pattern[off+1], right_w);
+        if (has_text && r == text_mid) {
+            tw.repeat(info.pattern[off+1], text_left);
+            tw << info.text_fg << render_text << info.border_fg;
+            tw.repeat(info.pattern[off+1], text_right);
         }
         else {
-            tw.repeat(pattern[off+1], cols - 2);
+            tw.repeat(info.pattern[off+1], cols - 2);
         }
 
-        tw.write(pattern[off+2]);
+        tw.write(info.pattern[off+2]);
 
         tw.write("\x1b[0m\r\n");
     }
 
     tw.emit();
 }
-
-
 
 }
