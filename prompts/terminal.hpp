@@ -9,6 +9,8 @@
 
 namespace prompts {
 
+typedef std::int16_t pos_t;
+
 class terminal_writer {
 private:
     std::vector<char> m_data;
